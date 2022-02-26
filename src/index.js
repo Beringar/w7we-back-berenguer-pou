@@ -1,5 +1,5 @@
 require("dotenv").config();
-const debug = require("debug")("series:root");
+const debug = require("debug")("beringarNetwork:root");
 const chalk = require("chalk");
 const connectToMongoDB = require("./db");
 
