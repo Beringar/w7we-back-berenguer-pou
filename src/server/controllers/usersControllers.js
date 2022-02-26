@@ -1,5 +1,7 @@
 const debug = require("debug")("series:userControllers");
 const chalk = require("chalk");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../../db/models/User");
 const encryptPassword = require("../utils/encryptPassword");
 
@@ -28,6 +30,41 @@ const userRegister = async (req, res, next) => {
   }
 };
 
+const userLogin = async (req, res, next) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      const error = new Error(`User ${username} not found!`);
+      error.code = 401;
+      next(error);
+    } else {
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        const error = new Error(`Invalid credentials!`);
+        error.code = 401;
+        next(error);
+      } else {
+        const userData = {
+          username,
+          name: user.name,
+          id: user.id,
+        };
+        const token = jwt.sign(userData, process.env.JWT_SECRET);
+        debug(
+          chalk.cyanBright(
+            `Token ${token} generated for > user ${user.username} id:${user.id}`
+          )
+        );
+        res.json({ token });
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   userRegister,
+  userLogin,
 };
