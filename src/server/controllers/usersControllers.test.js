@@ -82,9 +82,10 @@ describe("Given a registerUSer controller", () => {
     test("Then it should call next with error 'Username Pepe8 already exists!'", async () => {
       const req = {
         body: { username: "Pepe8", password: "999", name: "José Pérez" },
+        file: { filename: "aaa", originalname: "bbb" },
       };
       const next = jest.fn();
-      // User.findOne = jest.fn().mockResolvedValue(true);
+      User.findOne = jest.fn().mockResolvedValue(true);
 
       const error = new Error(`Username ${req.body.username} already exists!`);
 
@@ -97,6 +98,7 @@ describe("Given a registerUSer controller", () => {
     test("Then it should call the json method of the response with the created user", async () => {
       const req = {
         body: { username: "Maria3", password: "222", name: "María Lunarillos" },
+        file: { filename: "aaa", originalname: "bbb" },
       };
 
       const expectedJsonRes = {
@@ -112,6 +114,7 @@ describe("Given a registerUSer controller", () => {
         username: req.body.username,
         password: encryptedPassword,
         name: req.body.name,
+        image: req.file.filename,
       };
       User.findOne = jest.fn().mockResolvedValue(false);
 
