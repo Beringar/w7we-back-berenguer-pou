@@ -1,8 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../../db/models/User");
-const encryptPassword = require("../utils/encryptPassword");
-const { userLogin, userRegister } = require("./usersControllers");
+const { userLogin } = require("./usersControllers");
 
 describe("Given a userLogin controller", () => {
   describe("When it receives a response with invalid username Paquito", () => {
