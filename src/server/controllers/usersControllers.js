@@ -18,6 +18,9 @@ const userRegister = async (req, res, next) => {
       next(error);
       return;
     }
+    const oldFileName = path.join("uploads", req.file.filename);
+    const newFileName = path.join("uploads", req.file.originalname);
+    fs.rename(oldFileName, newFileName, () => {});
     const newUser = await User.create({
       username,
       password: encryptedPassword,
