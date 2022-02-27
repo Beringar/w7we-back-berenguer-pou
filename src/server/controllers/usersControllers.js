@@ -25,7 +25,7 @@ const userRegister = async (req, res, next) => {
       username,
       password: encryptedPassword,
       name,
-      image: req.file.filename,
+      image: newFileName,
     });
     debug(chalk.cyanBright(`User created with username: ${newUser.username}`));
     res.status(201);
