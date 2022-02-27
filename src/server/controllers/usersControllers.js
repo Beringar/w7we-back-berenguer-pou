@@ -104,7 +104,17 @@ const userLogin = async (req, res, next) => {
   }
 };
 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}, { password: 0 });
+    res.json({ users });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
+  getAllUsers,
 };
