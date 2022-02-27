@@ -1,8 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../../db/models/User");
-const encryptPassword = require("../utils/encryptPassword");
-const { userLogin, userRegister } = require("./usersControllers");
+const { userLogin } = require("./usersControllers");
 
 describe("Given a userLogin controller", () => {
   describe("When it receives a response with invalid username Paquito", () => {
@@ -73,57 +72,6 @@ describe("Given a userLogin controller", () => {
       await userLogin(req, res, () => null);
 
       expect(res.json).toHaveBeenCalled();
-    });
-  });
-});
-
-describe("Given a registerUSer controller", () => {
-  describe("When it receives a request with an existing username 'Pepe8", () => {
-    test("Then it should call next with error 'Username Pepe8 already exists!'", async () => {
-      const req = {
-        body: { username: "Pepe8", password: "999", name: "José Pérez" },
-        file: { filename: "aaa", originalname: "bbb" },
-      };
-      const next = jest.fn();
-      User.findOne = jest.fn().mockResolvedValue(true);
-
-      const error = new Error(`Username ${req.body.username} already exists!`);
-
-      await userRegister(req, null, next);
-
-      expect(next).toHaveBeenCalledWith(error);
-    });
-  });
-  describe("When it recieves a request with an non existent username", () => {
-    test("Then it should call the json method of the response with the created user", async () => {
-      const req = {
-        body: { username: "Maria3", password: "222", name: "María Lunarillos" },
-        file: { filename: "aaa", originalname: "bbb" },
-      };
-
-      const expectedJsonRes = {
-        message: "User registered with username: Maria3",
-      };
-
-      const res = {
-        json: jest.fn(),
-        status: jest.fn(),
-      };
-      const encryptedPassword = await encryptPassword(req.body.password);
-      const createdUser = {
-        username: req.body.username,
-        password: encryptedPassword,
-        name: req.body.name,
-        image: req.file.filename,
-      };
-      User.findOne = jest.fn().mockResolvedValue(false);
-
-      User.create = jest.fn().mockResolvedValue(createdUser);
-
-      await userRegister(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(expectedJsonRes);
     });
   });
 });

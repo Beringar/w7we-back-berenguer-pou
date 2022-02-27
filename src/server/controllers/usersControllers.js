@@ -1,11 +1,23 @@
+require("dotenv").config();
 const debug = require("debug")("series:userControllers");
 const chalk = require("chalk");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const { initializeApp } = require("firebase/app");
+const {
+  getStorage,
+  uploadBytes,
+  ref,
+  getDownloadURL,
+} = require("firebase/storage");
 const User = require("../../db/models/User");
 const encryptPassword = require("../utils/encryptPassword");
+
+const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
 
 const userRegister = async (req, res, next) => {
   const { username, password, name } = req.body;
@@ -20,16 +32,36 @@ const userRegister = async (req, res, next) => {
     }
     const oldFileName = path.join("uploads", req.file.filename);
     const newFileName = path.join("uploads", req.file.originalname);
-    fs.rename(oldFileName, newFileName, () => {});
-    const newUser = await User.create({
-      username,
-      password: encryptedPassword,
-      name,
-      image: newFileName,
+    fs.rename(oldFileName, newFileName, (error) => {
+      if (error) {
+        next(error);
+      }
     });
-    debug(chalk.cyanBright(`User created with username: ${newUser.username}`));
-    res.status(201);
-    res.json({ message: `User registered with username: ${newUser.username}` });
+    fs.readFile(newFileName, async (error, file) => {
+      if (error) {
+        next(error);
+      } else {
+        const storageRef = ref(
+          storage,
+          `${Date.now()}_${req.file.originalname}`
+        );
+        await uploadBytes(storageRef, file);
+        const firebaseFileURL = await getDownloadURL(storageRef);
+        const newUser = await User.create({
+          username,
+          password: encryptedPassword,
+          name,
+          image: firebaseFileURL,
+        });
+        debug(
+          chalk.cyanBright(`User created with username: ${newUser.username}`)
+        );
+        res.status(201);
+        res.json({
+          message: `User registered with username: ${newUser.username}`,
+        });
+      }
+    });
   } catch (error) {
     fs.unlink(path.join("uploads", req.file.filename), () => {
       error.code = 400;
