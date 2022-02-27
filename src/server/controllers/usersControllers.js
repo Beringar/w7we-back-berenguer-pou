@@ -2,6 +2,8 @@ const debug = require("debug")("series:userControllers");
 const chalk = require("chalk");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 const User = require("../../db/models/User");
 const encryptPassword = require("../utils/encryptPassword");
 
@@ -20,13 +22,16 @@ const userRegister = async (req, res, next) => {
       username,
       password: encryptedPassword,
       name,
+      image: req.file.filename,
     });
     debug(chalk.cyanBright(`User created with username: ${newUser.username}`));
     res.status(201);
     res.json({ message: `User registered with username: ${newUser.username}` });
   } catch (error) {
-    error.code = 400;
-    next(error);
+    fs.unlink(path.join("uploads", req.file.filename), () => {
+      error.code = 400;
+      next(error);
+    });
   }
 };
 

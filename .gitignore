@@ -5,6 +5,7 @@
 
 ### macOS ###
 # General
+uploads
 node_modules
 .env
 .vscode
