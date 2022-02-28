@@ -89,6 +89,7 @@ const userLogin = async (req, res, next) => {
           username,
           name: user.name,
           id: user.id,
+          image: user.image,
         };
         const token = jwt.sign(userData, process.env.JWT_SECRET);
         debug(
