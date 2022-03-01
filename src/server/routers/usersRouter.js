@@ -14,5 +14,6 @@ const upload = multer({ dest: "uploads" });
 router.get("/", auth, getAllUsers);
 router.post("/register", upload.single("image"), userRegister);
 router.post("/login", userLogin);
+router.post("/addfriend/:id", auth, userAddFriend);
 
 module.exports = router;
