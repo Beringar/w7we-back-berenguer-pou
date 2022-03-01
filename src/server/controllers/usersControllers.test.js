@@ -1,7 +1,8 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../../db/models/User");
-const { userLogin } = require("./usersControllers");
+const encryptPassword = require("../utils/encryptPassword");
+const { userLogin, userRegister } = require("./usersControllers");
 
 describe("Given a userLogin controller", () => {
   describe("When it receives a response with invalid username Paquito", () => {
@@ -72,6 +73,24 @@ describe("Given a userLogin controller", () => {
       await userLogin(req, res, () => null);
 
       expect(res.json).toHaveBeenCalled();
+    });
+  });
+});
+
+describe("Given a userRegister controller", () => {
+  describe("When it receives an already taken username", () => {
+    test("Then it should call next method wirth an error message 'Username Beren already exists!'", async () => {
+      const req = {
+        body: { username: "Beren", password: "asasas", name: "Pedro Pérez" },
+      };
+      await encryptPassword(req.body.password);
+      User.findOne = jest.fn().mockResolvedValue(true);
+      const error = new Error(`Username ${req.body.username} already exists!`);
+      const next = jest.fn();
+
+      await userRegister(req, null, next);
+
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 });

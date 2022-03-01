@@ -1,4 +1,3 @@
-require("dotenv").config();
 const debug = require("debug")("series:userControllers");
 const chalk = require("chalk");
 const bcrypt = require("bcrypt");
@@ -13,6 +12,7 @@ const {
   getDownloadURL,
 } = require("firebase/storage");
 const User = require("../../db/models/User");
+
 const encryptPassword = require("../utils/encryptPassword");
 
 const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
@@ -40,27 +40,24 @@ const userRegister = async (req, res, next) => {
     fs.readFile(newFileName, async (error, file) => {
       if (error) {
         next(error);
-      } else {
-        const storageRef = ref(
-          storage,
-          `${Date.now()}_${req.file.originalname}`
-        );
-        await uploadBytes(storageRef, file);
-        const firebaseFileURL = await getDownloadURL(storageRef);
-        const newUser = await User.create({
-          username,
-          password: encryptedPassword,
-          name,
-          image: firebaseFileURL,
-        });
-        debug(
-          chalk.cyanBright(`User created with username: ${newUser.username}`)
-        );
-        res.status(201);
-        res.json({
-          message: `User registered with username: ${newUser.username}`,
-        });
+        return;
       }
+      const storageRef = ref(storage, `${Date.now()}_${req.file.originalname}`);
+      await uploadBytes(storageRef, file);
+      const firebaseFileURL = await getDownloadURL(storageRef);
+      const newUser = await User.create({
+        username,
+        password: encryptedPassword,
+        name,
+        image: firebaseFileURL,
+      });
+      debug(
+        chalk.cyanBright(`User created with username: ${newUser.username}`)
+      );
+      res.status(201);
+      res.json({
+        message: `User registered with username: ${newUser.username}`,
+      });
     });
   } catch (error) {
     fs.unlink(path.join("uploads", req.file.filename), () => {
