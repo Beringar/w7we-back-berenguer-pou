@@ -111,8 +111,24 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+const userAddFriend = async (req, res, next) => {
+  const { userId, friendId } = req.params;
+  try {
+    const user = await User.findById(userId);
+
+    user.friends.push(friendId);
+    const updatedUser = await User.findByIdAndUpdate(userId, user, {
+      new: true,
+    });
+    res.json({ updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   userRegister,
   userLogin,
   getAllUsers,
+  userAddFriend,
 };
