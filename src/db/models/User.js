@@ -17,6 +17,8 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  enemies: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 const User = model("User", UserSchema, "users");
